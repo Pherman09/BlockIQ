@@ -29,7 +29,6 @@ var CensusTractGeoJSON = function(FIPSCode){
   url = "https://raw.githubusercontent.com/yuchu/BlockIQ/master/Census_Tracts_2010.geojson";
   $.ajax(url).done(function(data){
     parsed= JSON.parse(data);
-    console.log(parsed);
     CensusTract = L.geoJson(parsed, {
       filter: function(feature){
         return (feature.properties.GEOID10==FIPSCode.substring(0,11));
@@ -92,6 +91,9 @@ var processFIPSCode = function(FIPSCode) {
   FIPStoinfo(state,county,tract);
 };
 
+
+var censusBits2 =[];
+
 var FIPStoinfo = function(state,county,tract){
   httpCensus = "http://api.census.gov/data/2014/acs5";
   censusKey = "&key=ccda5ba8300d0a723e4cba2a1a0e7cf9b2768b46";
@@ -120,67 +122,36 @@ var FIPStoinfo = function(state,county,tract){
   commuteWorkAtHome = "B08006_017E";
   commuteOther = "B08006_016E";
 
-  params = "?get=" + population +
-  "," + medianAge +
+  params = "?get=" + totalDoctors +
   "," + medianRent +
-  "," + medianIncome +
-  "," + totalInPoverty  +
-  "," + totalVeterans +
-  "," + totalHousingUnits +
-  "," + totalRenterOccupied +
-  "," + totalOwnerOccupied +
-  ","+ totalOccupiedHousingUnites  +
-  "," + totalInsured +
-  "," + totalDoctors +
-    "," + totalForeignBorn +
-    "," + commuteCarpool +
-    "," + commuteCarAlone +
-    "," + commutePublicTransportation +
-    ","+ commuteWalk +
-    "," + commuteBike +
-    "," + commuteWorkAtHome +
-    "," + commuteOther + "&";
+  "," + commutePublicTransportation +
+  "," + totalForeignBorn +
+  "," + totalVeterans + "&";
   geography = "for=tract:" + tract + "&in=state:" + state+ "+county:" + county;
   tractCall = httpCensus + params + geography + censusKey;
-  console.log(tractCall);
   $.ajax({
     url: tractCall,
     crossDomain:true,
     success: function (data, textStatus, xhr) {
-      console.log(data);
       censusBits = [];
-      populationOb = createOb(0,"population",data[1][0],"people","Population Characteristics");
-      medianAgeOb = createOb(1,"Median Age",data[1][1],"years","Population Characteristics");
-      medianRentOb = createOb(2,"Median Rent",data[1][2],"dollars","Housing Characteristics");
-      medianIncomeOb = createOb(3,"Median Income",data[1][3],"dollars","Financial Characteristics");
-      totalInPovertyOb = createOb(4,"Population Below the Poverty Line",data[1][4],"people","Financial Characteristics");
-      totalVeteransOb = createOb(5,"Number of Veterans",data[1][5],"people","Population Characteristics");
-      totalHousingUnitsOb = createOb(6,"Total Number of Housing Units",data[1][6],"housing units","Housing Characteristics");
-      totalRenterOccupiedOb =createOb(7,"Total Number of Renter Occupied Households",data[1][7],"housing units","Housing Characteristics");
-      totalOwnerOccupiedOb = createOb(8,"Total Number of Owner Occupied Households",data[1][8],"housing units","Housing Characteristics");
-      totalOccupiedHousingUnitesOb = createOb(9,"Total Number of Owner Occupied Households",data[1][9],"households","Housing Characteristics");
-      totalInsuredOb = createOb(10,"Number of People with Insurance",data[1][10],"people","Financial Characteristics");
-      totalDoctorsOb = createOb(11,"Number of People with PhDs",data[1][11],"people","Population Characteristics");
-      totalForeignBornOb = createOb(12,"Foreign Born Population",data[1][12],"people","Population Characteristics");
-      commuteCarpoolOb = createOb(13,"Number of People who Commute via Carpooling",data[1][13],"people","Transportation");
-      commuteCarAloneOb = createOb(14,"Number of People who Commute by Driving Alone",data[1][14],"people","Transportation");
-      commutePublicTransportationOb = createOb(15,"Number of People who Commute with Public Transportation",data[1][15],"people","Transportation");
-      commuteWalknOb = createOb(16,"Number of People who Commute by Walking",data[1][16],"people","Transportation");
-      commuteBikeOb = createOb(17,"Number of People who Commute by Biking",data[1][17],"people","Transportation");
-      commuteWorkAtHome =createOb(18,"Number of People who don't commute because they work at home",data[1][18],"people","Transportation");
-      commuteOther =createOb(19,"Number of People who Commute with Unidentified Method",data[1][19],"people","Transportation");
+      totalDoctorsOb = createOb(0,"How many people in your neighborhood hold a doctorate degree?",data[1][0],"people","Population Characteristics");
+      medianRentOb = createOb(1,"Which of these choices is the median rent in your neighborhood?",data[1][1],"dollars","Housing Characteristics");
+      commutePublicTransportationOb = createOb(2,"How many people in your neighborhood take public transit to work?",data[1][2],"people","Transportation");
+      totalForeignBornOb = createOb(3,"How many people in your neighborhood are foreign-born?",data[1][3],"people","Population Characteristics");
+      VeteransOb = createOb(4,"How many people in your neighborhood are veterans?",data[1][4],"people","Population Characteristics");
       console.log(censusBits);
+      censusBits2 = censusBits;
+      console.log(censusBits2);
   }
 });
 };
-
-
-
 
 //Get Long and Lat from center of map, then call FCC Block Converter API
 //On pressing enter in search bar
 $('#AddressForm').keypress(function(e){
 if(e.which == 13) {
+  $('#Scene2').show();
+  $('#Scene1').hide();
   var query = $('#AddressForm').val();
     $.ajax({
       url: "http://nominatim.openstreetmap.org/search?format=json&addressdetails=0&limit=1&countrycodes=US&q="+query+" philadelphia pa",
@@ -197,6 +168,8 @@ if(e.which == 13) {
       crossDomain:true,
       success: function (data, textStatus, xhr) {
       FIPSCode = data.Block.FIPS;
+      $("#CensusNum").text(FIPSCode.substring(5,11)
+    );
       processFIPSCode(FIPSCode);
       CensusTractGeoJSON(FIPSCode);
       // plotCensusTract();
@@ -212,12 +185,110 @@ if(e.which == 13) {
 $(document).ready(function(){
   $('#Scene1').show();
   $('#Scene2').hide();
+  $('#Scene3').hide();
 });
 
 
 //Load Second Page on Click of function
 $('#ToQuizSlide').click(function(){
   //If statement, give alert if geocoding failed
-  $('#Scene1').hide();
-  $('#Scene2').show();
+  $('#Scene2').hide();
+  $('#Scene3').show();
+  $('#button-next').hide();
+  var buttonsContainer = $('#buttons');
+  var userAnswers = 0;
+  var Qanswers;
+
+  var setButtons = function(answers) {
+    buttonsContainer.empty();
+    $.each(answers, function(key, answer) {
+      buttonsContainer.append('<button id="'+key+'" value="'+key+'">'+answer.value+'</button>');
+    });
+    Qanswers = answers;
+  };
+
+  $('#buttons').click(function(e){
+    var even =0;
+    for (i=0; i<Qanswers.length; i++){
+      $('#'+i+'').prop('disabled',true);
+      even = even + Qanswers[i].correct*i;
+    }
+    // _.map(Qanswers, function(num){ $('#'+num+'').prop('disabled',true); });
+    // var even = _.find([0, 1, 2, 3], function(num){ return Qanswers[num].correct==1;});
+    if(Qanswers[e.target.value].correct){
+      $('#'+e.target.value+'').css("background-color","green");
+      userAnswers = userAnswers + 1;
+    }
+    else {
+      $('#'+even+'').css("background-color","green");
+      $('#'+e.target.value+'').css("background-color","red");
+    }
+    $('#button-next').show();
+  });
+
+  var setQuestion = function(question) {
+    $('#question').text(question);
+  };
+
+  var generateAnswers = function(obj) {
+    var answers = [];
+    var correctIndex = _.random(0, 3);
+    for (var i = 0; i < 4; i++) {
+      if (i === correctIndex) {
+        answers.push({
+          correct: 1,
+          value: obj.value,
+        });
+      }
+      else {
+        var wrong = obj.wronganswers.pop();
+        answers.push({
+          correct: 0,
+          value: wrong,
+        });
+      }
+    }
+    return answers;
+  };
+
+  var questions =[];
+  _.each(censusBits2,function(obj){
+    var question = {
+      id: obj.id,
+      question: obj.subject,
+      answers: generateAnswers(obj)
+    };
+    questions.push(question);
+  });
+
+  var finalpage = {
+    id:6,
+    question: "You are a "
+  };
+
+  questions.push(finalpage);
+
+  setButtons(questions[0].answers);
+  setQuestion(questions[0].question);
+  var state_q=1;
+  $('#button-next').click(function(){
+    setButtons(questions[state_q].answers);
+    setQuestion(questions[state_q].question);
+    state_q++;
+    $('#button-next').hide();
+    if (state_q == 6){
+      $("#cat").text(category[userAnswers].cat);
+      $("#cat-numRight").text(category[userAnswers].numRight);
+      // $("#image").empty().append('<img src= category[userAnswers].image height="25%" width="25%">');
+      $("#cat-text").text(category[userAnswers].text);
+    }
+  });
+  var category =[
+  {cat: "Tourist", numRight: "0/5 Answers Correct", text: "Pat's and Geno's might be in this neighborhood, but then again, you might just be lost.", image: "https://c.stocksy.com/a/Ink200/z0/656536.jpg"},
+  {cat: "Regional Rail Rider", numRight: "1/5 Answers Correct", text: "You're here. Sometimes. You might be gone before 11 pm but you sure know how to get the most out of Septa.", image: "https://c.stocksy.com/a/Ink200/z0/656536.jpg"},
+  {cat: "Stray Cat", numRight: "2/5 Answers Correct", text: "You're a rolling stone, you might say 'Hi' to your neighbords but you're still aloof.", image: "https://c.stocksy.com/a/Ink200/z0/656536.jpg"},
+  {cat: "Mail Delivery Person", numRight: "3/5 Answers Correct", text: "You know all the neighborhood gossip, but you keep the who's-who's to yourself. Props.", image: "https://c.stocksy.com/a/Ink200/z0/656536.jpg"},
+  {cat: "Block Captain", numRight: "4/5 Answers Correct", text: "You've got tons of pride in your neighborhood, you keep things in line, and theres a high chance you might say 'wudder'", image: "https://c.stocksy.com/a/Ink200/z0/656536.jpg"},
+  {cat: "Mayor Kenney", numRight: "5/5 Answers Correct", text: "You know the city inside and out. At some point there will probably be a mural erected in your honor.", image: "https://c.stocksy.com/a/Ink200/z0/656536.jpg"}
+  ];
 });

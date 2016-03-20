@@ -8,22 +8,32 @@
     <link rel="stylesheet" href="js/L.GeoSearch-master/src/css/l.geosearch.css" />
   </head>
   <body>
-    <div id="Scene1">
-      <!-- Header -->
-      <header class="header">
-        <div id="AppTitle">What's your BlockIQ? Test How Well You Know Your Neighborhood!</div>
-        <input type="text" name="adname" id="AddressForm" placeholder="Enter your address...">
-      </header>
-      <!-- Map -->
-      <div id="map" class="map"></div>
-      <!--Footer-->
-      <footer class="footer">
-          <button id="ToQuizSlide">Take the Quiz</button>
-      </footer>
-    </div>
-    <div id="Scene2">
-      <p>Secret Text</p>
-    <div>
+    <!--Sidebar-->
+    <sidebar>
+      <div id="Scene1">
+        <h1 id="AppTitle">What's your BlockIQ?</h1>
+        <p id ="subtitle">Test How Well You Know Your Neighborhood!</p>
+        <input type="text" name="adname" id="AddressForm" placeholder="Enter your address..."-->
+      </div>
+      <div id="Scene2">
+        <p>Your Census Tract: <span id="CensusNum"></span></p>
+        <button id="ToQuizSlide">Start Quiz</button>
+      </div>
+      <div id="Scene3">
+        <p>Quiz Text</p>
+        <div id="question"></div>
+        <div id="buttons"></div>
+        <br>
+        <br>
+        <input type="submit" id="button-next" value="Next">
+        <label id="cat"></label>
+        <label id="cat-numRight"></label>
+        <div id="image" class="image"></div>
+        <label id="cat-text"></label>
+      </div>
+    </sidebar>
+    <!-- Map -->
+    <div id="map" class="map"></div>
     <!-- Javascript Imports -->
     <script src="js/jquery-2.2.0.js"></script>
     <script src="js/underscore.js"></script>
