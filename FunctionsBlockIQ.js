@@ -79,7 +79,7 @@ var createOb = function(id,subject,value,unit,catagory){
     "subject":subject,
     "value": valCensus,
     "unit": unit,
-    "catagory":"placeholder",
+    "catagory":catagory,
     "wronganswers":createWrongAnswers(valCensus)
   });
 };
