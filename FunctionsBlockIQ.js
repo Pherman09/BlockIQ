@@ -280,9 +280,10 @@ $('#ToQuizSlide').click(function(){
     $("#count").text(''+state_q+'/5');
     $('#button-next').hide();
     if (state_q == 6){
+      $("#count").text('Result');
       $("#cat").text(category[userAnswers].cat);
       $("#cat-numRight").text(category[userAnswers].numRight);
-      // $("#image").empty().append('<img src= ' + category[userAnswers].image + ' height="25%" width="25%">');
+      $("#image").empty().append('<img src= ' + category[userAnswers].image + ' height="25%" width="25%">');
       $("#cat-text").text(category[userAnswers].text);
     }
   });
